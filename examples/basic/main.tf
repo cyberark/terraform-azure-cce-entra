@@ -8,10 +8,6 @@ terraform {
       source  = "hashicorp/azurerm"
       version = "~> 4.0"
     }
-    idsec = {
-      source  = "cyberark/idsec"
-      version = "~> 0.1"
-    }
   }
 
   required_version = ">= 1.8.5"
@@ -25,14 +21,8 @@ provider "azurerm" {
 provider "azuread" {
 }
 
-provider "idsec" {
-  # Configure your CyberArk credentials here or via environment variables
-  # See: https://registry.terraform.io/providers/cyberark/idsec/latest/docs
-}
-
 module "cce_azure_entra" {
   source   = "../../"
   entra_id = var.entra_id
-  dummy    = { enable = true }
 }
 
