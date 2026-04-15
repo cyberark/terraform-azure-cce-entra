@@ -4,4 +4,4 @@
 *.tfstate.*
 *.tfplan
 *.out
-.idea/
+.idea

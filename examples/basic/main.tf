@@ -24,5 +24,6 @@ provider "azuread" {
 module "cce_azure_entra" {
   source   = "../../"
   entra_id = var.entra_id
+  sia      = { enable = true } # Enable SIA (Secure Infrastructure Access) service
 }
 
