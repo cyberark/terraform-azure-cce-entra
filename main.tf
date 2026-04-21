@@ -16,7 +16,7 @@ locals {
   at_least_1_service_enabled = var.sia.enable == true || var.sca.enable == true
 }
 module "cce" {
-  source            = "./services_modules/cce"
+  source            = "./modules/cce"
   entra_id          = var.entra_id
   identity_issuer   = local.cce_wif_data["identity_app_issuer"]
   identity_user_id  = local.cce_wif_data["identity_user_id"]
@@ -26,7 +26,7 @@ module "cce" {
 
 
 module "sia" {
-  source            = "./services_modules/sia"
+  source            = "./modules/sia"
   entra_id          = var.entra_id
   identity_issuer   = local.sia_wif_data["identity_app_issuer"]
   identity_user_id  = local.sia_wif_data["identity_user_id"]
@@ -35,7 +35,7 @@ module "sia" {
 }
 
 module "sca" {
-  source           = "./services_modules/sca"
+  source           = "./modules/sca"
   count            = var.sca.enable && var.sca.shared_resources != null ? 1 : 0
   entra_id         = var.entra_id
   shared_resources = var.sca.shared_resources
