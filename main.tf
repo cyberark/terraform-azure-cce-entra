@@ -3,7 +3,7 @@ terraform {
   required_providers {
     idsec = {
       source  = "cyberark/idsec"
-      version = "~> 0.2.1"
+      version = "0.10.0"
     }
   }
 }
@@ -56,6 +56,7 @@ resource "idsec_cce_azure_entra" "create_entra" {
     var.sia.enable ? [
       {
         service_name = "dpa"
+        version      = "0.0.1"
         resources = {
           application_ids = [module.sia[0].sia_app_id]
         }
@@ -64,6 +65,7 @@ resource "idsec_cce_azure_entra" "create_entra" {
     var.sca.enable && var.sca.shared_resources != null ? [
       {
         service_name = "sca"
+        version      = "0.0.3"
         resources = {
           applications = [
             {
