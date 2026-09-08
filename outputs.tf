@@ -18,3 +18,8 @@ output "sca_resource_app_id" {
   value       = var.sca.enable && var.sca.shared_resources != null ? var.sca.shared_resources.resource_app_id : null
   description = "The Application (client) ID of the CyberArk SCA Resource app (from commons)"
 }
+
+output "entra_onboarding_id" {
+  value       = length(idsec_cce_azure_entra.create_entra) > 0 ? idsec_cce_azure_entra.create_entra[0].id : null
+  description = "The ID of the Entra tenant onboarding resource. Returns null when no service is enabled"
+}

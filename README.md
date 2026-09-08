@@ -89,6 +89,7 @@ module "cce_azure_entra" {
 | `sia_app_id` | The SIA app (client) ID (if enabled) |
 | `sca_app_id` | The SCA Entra application (client) ID (from commons, when SCA enabled) |
 | `sca_resource_app_id` | The SCA Resource application (client) ID (from commons, when SCA enabled) |
+| `entra_onboarding_id` | The ID of the Entra tenant onboarding in CCE (null when no service is enabled) |
 
 ### What Gets Created
 
