@@ -80,6 +80,8 @@ module "cce_azure_entra" {
 | `sia` | Configuration for SIA (Secure Infrastructure Access) | `object({ enable = bool })` | `{ enable = false }` | no |
 | `sca.enable` | Enable SCA (Secure Cloud Access) at Entra scope | `bool` | `false` | no |
 | `sca.shared_resources` | SCA shared resources from Commons output (required when sca.enable = true). Must include entra_app_id, entra_custom_role_id, entra_wif_user_id, resource_app_id, resource_custom_role_id, resource_wif_user_id. | `object` | `null` | no |
+| `sca.shared_resources.add_permissions_to_manage_cluster` | When true, assigns the K8s custom role at the root management group scope. Requires `resource_k8s_custom_role_id` to be non-empty. | `bool` | `false` | no |
+| `sca.shared_resources.resource_k8s_custom_role_id` | The K8s custom role ID from Commons output (required when `add_permissions_to_manage_cluster` is true). | `string` | `null` | no |
 
 ### Outputs
 
@@ -110,6 +112,7 @@ module "cce_azure_entra" {
 #### SCA (Optional - when `sca.enable = true` and `sca.shared_resources` set)
 - Role assignment of the SCA Entra app (from commons) to the SCA Entra custom role at Entra/tenant scope
 - SCA service registration in CCE for the Entra tenant. Resource app and role come from Commons; this module only performs the Entra-level assignment and idsec registration.
+- When `shared_resources.add_permissions_to_manage_cluster` is true, assigns the K8s custom role (`resource_k8s_custom_role_id` from commons) at the root management group.
 
 ## Documentation
 For more detailed examples, see the [Basic Example](./examples/basic) directory.

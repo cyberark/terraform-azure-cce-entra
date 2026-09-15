@@ -12,16 +12,18 @@ variable "sia" {
 }
 
 variable "sca" {
-  description = "SCA config. When enable is true, shared_resources (from commons output) is required; Entra only consumes it and does not create SCA resources."
+  description = "SCA config. When enable is true, shared_resources (from commons output) is required; Entra only consumes it and does not create SCA resources. Pass through add_permissions_to_manage_cluster and resource_k8s_custom_role_id from commons; when true, assigns the K8s custom role at the root management group."
   type = object({
     enable = optional(bool, true)
     shared_resources = optional(object({
-      entra_app_id            = optional(string)
-      entra_custom_role_id    = optional(string)
-      entra_wif_user_id       = optional(string)
-      resource_app_id         = optional(string)
-      resource_custom_role_id = optional(string)
-      resource_wif_user_id    = optional(string)
+      entra_app_id                      = optional(string)
+      entra_custom_role_id              = optional(string)
+      entra_wif_user_id                 = optional(string)
+      resource_app_id                   = optional(string)
+      resource_custom_role_id           = optional(string)
+      resource_wif_user_id              = optional(string)
+      add_permissions_to_manage_cluster = optional(bool, false)
+      resource_k8s_custom_role_id       = optional(string)
     }), null)
   })
   default = { enable = false, shared_resources = null }
@@ -38,6 +40,15 @@ variable "sca" {
       try(var.sca.shared_resources.resource_wif_user_id, null) != null)
     )
     error_message = "When SCA is enabled (sca.enable = true), sca.shared_resources must be set and must include all fields: entra_app_id, entra_custom_role_id, entra_wif_user_id, resource_app_id, resource_custom_role_id, resource_wif_user_id (from commons output)."
+  }
+
+  validation {
+    condition = (
+      !var.sca.enable ||
+      try(var.sca.shared_resources.add_permissions_to_manage_cluster, false) ==
+      (try(var.sca.shared_resources.resource_k8s_custom_role_id, null) != null)
+    )
+    error_message = "add_permissions_to_manage_cluster and resource_k8s_custom_role_id must both be set or both be unset — they must agree."
   }
 }
 

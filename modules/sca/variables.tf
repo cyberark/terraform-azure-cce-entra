@@ -6,11 +6,13 @@ variable "entra_id" {
 variable "shared_resources" {
   description = "SCA shared resources from commons (created or passed through). Same shape always."
   type = object({
-    entra_app_id            = optional(string)
-    entra_custom_role_id    = optional(string)
-    entra_wif_user_id       = optional(string)
-    resource_app_id         = optional(string)
-    resource_custom_role_id = optional(string)
-    resource_wif_user_id    = optional(string)
+    entra_app_id                      = optional(string)
+    entra_custom_role_id              = optional(string)
+    entra_wif_user_id                 = optional(string)
+    resource_app_id                   = optional(string)
+    resource_custom_role_id           = optional(string)
+    resource_wif_user_id              = optional(string)
+    add_permissions_to_manage_cluster = optional(bool, false)
+    resource_k8s_custom_role_id       = optional(string)
   })
 }
