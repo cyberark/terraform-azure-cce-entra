@@ -1,4 +1,4 @@
 variable "entra_id" {
-  description = "The Azure Entra (Tenant) ID"
+  description = "The Microsoft Entra tenant ID."
   type        = string
 }

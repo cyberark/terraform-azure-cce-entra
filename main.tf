@@ -3,7 +3,7 @@ terraform {
   required_providers {
     idsec = {
       source  = "cyberark/idsec"
-      version = "0.10.0"
+      version = "0.12.1"
     }
   }
 }
@@ -42,17 +42,18 @@ module "sca" {
 }
 
 resource "idsec_cce_azure_entra" "create_entra" {
-  entra_id = var.entra_id
-  count    = local.at_least_1_service_enabled ? 1 : 0
+  entra_id    = var.entra_id
+  cce_version = "0.0.1"
+  count       = local.at_least_1_service_enabled ? 1 : 0
   cce_resources = {
     appId = module.cce[0].cce_app_id
   }
 
-  # Ensure CCE, SIA (if used), and SCA (if used) are ready before idsec adds the Entra tenant
+  # Ensure CCE, SIA (if used), and SCA (if used) are ready before idsec adds the Microsoft Entra tenant
   depends_on = [module.cce, module.sia, module.sca]
 
   services = concat(
-    # Add sia service if enabled and idsec provides dpa WIF data
+    # Add SIA if enabled and idsec provides dpa WIF data
     var.sia.enable ? [
       {
         service_name = "dpa"

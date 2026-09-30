@@ -1,10 +1,10 @@
 variable "entra_id" {
-  description = "The Azure entra ID"
+  description = "The Microsoft Entra ID."
   type        = string
 }
 
 variable "sia" {
-  description = "Configuration for the sia feature."
+  description = "SIA configuration."
   type = object({
     enable = optional(bool, true)
   })
@@ -12,7 +12,7 @@ variable "sia" {
 }
 
 variable "sca" {
-  description = "SCA config. When enable is true, shared_resources (from commons output) is required; Entra only consumes it and does not create SCA resources. Pass through add_permissions_to_manage_cluster and resource_k8s_custom_role_id from commons; when true, assigns the K8s custom role at the root management group."
+  description = "SCA configuration. When enable is true, shared_resources (from commons output) is required; only the Microsoft Entra tenant consumes it and does not create SCA resources. Pass through add_permissions_to_manage_cluster and resource_k8s_custom_role_id from commons; when true, assigns the K8s custom role at the root management group."
   type = object({
     enable = optional(bool, true)
     shared_resources = optional(object({
@@ -48,7 +48,7 @@ variable "sca" {
       try(var.sca.shared_resources.add_permissions_to_manage_cluster, false) ==
       (try(var.sca.shared_resources.resource_k8s_custom_role_id, null) != null)
     )
-    error_message = "add_permissions_to_manage_cluster and resource_k8s_custom_role_id must both be set or both be unset — they must agree."
+    error_message = "add_permissions_to_manage_cluster and resource_k8s_custom_role_id must both either be set or not set. No mixed values."
   }
 }
 

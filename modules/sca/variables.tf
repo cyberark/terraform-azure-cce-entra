@@ -1,5 +1,5 @@
 variable "entra_id" {
-  description = "The Azure Entra (management group) ID; scope for SCA Entra role assignment (same as commons role_definition_scope)."
+  description = "The Microsoft Entra tenant (management group) ID; scope for SCA Microsoft Entra tenant role assignment (same as commons role_definition_scope)."
   type        = string
 }
 

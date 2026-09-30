@@ -12,17 +12,17 @@ terraform {
   }
 }
 
-# Look up the SCA Entra app's service principal (from commons)
+# Look up the SCA Microsoft Entra tenant app's service principal (from commons)
 data "azuread_service_principal" "entra_app_sp" {
   client_id = var.shared_resources.entra_app_id
 }
 
-# Look up the SCA Resource app's service principal (from commons)
+# Look up the SCA resource app's service principal (from commons)
 data "azuread_service_principal" "sca_resource_app_sp" {
   client_id = var.shared_resources.resource_app_id
 }
 
-# Assign the SCA Entra app to the SCA Entra custom role at root management group scope
+# Assign the SCA Microsoft Entra tenant app to the SCA Microsoft Entra tenant's custom role at the root management group scope.
 resource "azurerm_role_assignment" "sca_entra_role_assignment" {
   scope              = "/providers/Microsoft.Management/managementGroups/${var.entra_id}"
   role_definition_id = var.shared_resources.entra_custom_role_id
