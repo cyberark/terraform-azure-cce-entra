@@ -1,12 +1,12 @@
 # CCE Azure Microsoft Entra Tenant Onboarding Module
 
-This Terraform module onboards Microsoft Entra tenants (formerly Azure AD) to Connect Cloud Environments (CCE) CyberArk SaaS services.
-CCE helps customers easily adopt CyberArk services and establish secure trust relationships with their Azure environments.
+This Terraform module onboards Microsoft Entra tenants (formerly Azure AD) to Connect Cloud Environments (CCE) Idira SaaS services.
+CCE helps customers easily adopt Idira services and establish secure trust relationships with their Azure environments.
 
 ## Overview  
 This module creates the necessary Microsoft Entra ID applications, service principals, federated identity credentials, and role assignments required for secure cloud onboarding.
 
-The module leverages Workload Identity Federation (WIF) to enable secure, passwordless authentication between CyberArk services and Azure resources.
+The module leverages Workload Identity Federation (WIF) to enable secure, passwordless authentication between Idira services and Azure resources.
 
 ## Features   
 - **Automated CCE Application Setup**: Creates and configures Microsoft Entra ID app registration for CCE with required Microsoft Graph API permissions
@@ -18,7 +18,7 @@ The module leverages Workload Identity Federation (WIF) to enable secure, passwo
 
 Before using this module, ensure that you have the following information and requirements:
 
-1. **CyberArk Identity Security Platform Account**
+1. **Idira Identity Security Platform Account**
    - API credentials (client ID and secret)
    - Tenant URL
 
@@ -32,7 +32,7 @@ Before using this module, ensure that you have the following information and req
    - Terraform >= 1.8.5
    - Azure AD Provider ~> 3.0
    - Azure RM Provider ~> 4.0
-   - CyberArk idsec Provider
+   - Idira idsec Provider
 4.**For SCA (Secure Cloud Access)**: 
    - When SCA is enabled, use the Commons module (`terraform-azure-cce-commons`) in your root configuration and pass its `sca` output as `sca.shared_resources`.
 
