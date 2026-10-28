@@ -1,6 +1,6 @@
-# Example: Basic CCE Microsoft Entra tenant Onboarding with SIA and SCA
+# Example: Basic CCE Microsoft Entra tenant Onboarding with SIA, SCA and Cloud Discovery
 
-This example demonstrates a basic configuration to onboard an Azure Entra tenant to CCE with SIA (Secure Infrastructure Access) enabled. SCA (Secure Cloud Access) can be enabled by passing `shared_resources` from the Commons module.
+This example demonstrates a basic configuration to onboard an Azure Entra tenant to CCE with SIA (Secure Infrastructure Access) enabled. SCA (Secure Cloud Access) and Cloud Discovery (for Cloud service entitlements) can be enabled by passing `shared_resources` from the Commons module.
 
 ## What This Example Does
 
@@ -8,12 +8,14 @@ This example demonstrates a basic configuration to onboard an Azure Entra tenant
 * Creates the core CCE application with required permissions
 * Enables SIA (Secure Infrastructure Access) for VM discovery and privileged access  
 * Enables SCA at Entra scope (when `sca.shared_resources` from Commons is provided)
+* Enables Cloud Discovery (for Cloud service entitlements) for the entire Microsoft Entra tenant (when `cds.shared_resources` from Commons is provided, see step 2 below)
 
 ## Prerequisites
 
 * Microsoft Entra tenant ID (formerly Azure AD)  
 * Terraform >= 1.8.5  
 * For SCA: run the Commons module first and pass its `sca` output as `shared_resources`
+* For Cloud Discovery: run the Commons module with `cds = { enable = true }` and pass its `cds` output as `cds.shared_resources`
 
 ## Usage
 
@@ -23,13 +25,14 @@ This example demonstrates a basic configuration to onboard an Azure Entra tenant
     entra_id = "0b659685-1a00-43cd-b994-555bac390ecf"
     ```
 
-2. To enable SCA, call the Commons module in your root configuration and pass its output into this module:
+2. To enable SCA or Cloud Discovery, call the Commons module in your root configuration and pass its output into this module:
 
     ```hcl
     module "cce_azure_shared" {
       source   = "path/to/terraform-azure-cce-commons"
       entra_id = var.entra_id
       sca      = { enable = true, parameters = { sca_entra_onboarding = true, ... } }
+      cds      = { enable = true }
     }
 
     module "cce_azure_entra" {
@@ -40,8 +43,14 @@ This example demonstrates a basic configuration to onboard an Azure Entra tenant
         enable           = true
         shared_resources = module.cce_azure_shared.sca
       }
+      cds = {
+        enable           = true
+        shared_resources = module.cce_azure_shared.cds
+      }
     }
     ```
+
+    For the full Cloud Discovery steps, including offboarding, see the `examples/cloud_discovery_onboarding` example in `terraform-azure-cce-commons`.
 
 3. Initialize Terraform:  
 
@@ -87,10 +96,15 @@ This example demonstrates a basic configuration to onboard an Azure Entra tenant
 * Role assignment of the SCA Entra app (from Commons) to the SCA Entra custom role at Entra/tenant scope
 * SCA service registration in CCE for the Entra tenant
 
+**When Cloud Discovery is enabled** (with `cds.enable = true` and `cds.shared_resources` from Commons):
+* Cloud Discovery access for the entire Microsoft Entra tenant, using the shared resources from Commons
+* Cloud Discovery service registration in CCE for the Entra tenant
+
 ### In CCE
 
 * Microsoft Entra ID registration in CCE   
 * When SCA is enabled: SCA service resources for the Entra tenant
+* When Cloud Discovery is enabled: Cloud Discovery service resources for the Entra tenant
 
 ## Outputs
 

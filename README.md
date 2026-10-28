@@ -33,8 +33,10 @@ Before using this module, ensure that you have the following information and req
    - Azure AD Provider ~> 3.0
    - Azure RM Provider ~> 4.0
    - Idira idsec Provider
-4.**For SCA (Secure Cloud Access)**: 
+4. **For SCA (Secure Cloud Access)**:
    - When SCA is enabled, use the Commons module (`terraform-azure-cce-commons`) in your root configuration and pass its `sca` output as `sca.shared_resources`.
+5. **For Cloud Discovery**:
+   - When Cloud Discovery is enabled, use the Commons module (`terraform-azure-cce-commons`) with `cds.enable = true` in your root configuration and pass its `cds` output as `cds.shared_resources`. See the `examples/cloud_discovery_onboarding` example in `terraform-azure-cce-commons`.
 
 ## Usage  
 
@@ -69,6 +71,10 @@ module "cce_azure_entra" {
     enable           = true
     shared_resources = module.cce_azure_shared.sca  # From terraform-azure-cce-commons; required when SCA enabled
   }
+  cds = {
+    enable           = true
+    shared_resources = module.cce_azure_shared.cds  # From terraform-azure-cce-commons; required when Cloud Discovery is enabled
+  }
 }
 ```
 
@@ -82,6 +88,8 @@ module "cce_azure_entra" {
 | `sca.shared_resources` | SCA shared resources from Commons output (required when sca.enable = true). Must include entra_app_id, entra_custom_role_id, entra_wif_user_id, resource_app_id, resource_custom_role_id, resource_wif_user_id. | `object` | `null` | no |
 | `sca.shared_resources.add_permissions_to_manage_cluster` | When true, assigns the K8s custom role at the root management group scope. Requires `resource_k8s_custom_role_id` to be non-empty. | `bool` | `false` | no |
 | `sca.shared_resources.resource_k8s_custom_role_id` | The K8s custom role ID from Commons output (required when `add_permissions_to_manage_cluster` is true). | `string` | `null` | no |
+| `cds.enable` | Enable Cloud Discovery at Entra scope | `bool` | `false` | no |
+| `cds.shared_resources` | Cloud Discovery shared resources from Commons output (required when cds.enable = true). Must include entra_app_id, entra_wif_user_id, resource_app_id, resource_custom_role_id, resource_wif_user_id. | `object` | `null` | no |
 
 ### Outputs
 
@@ -113,6 +121,11 @@ module "cce_azure_entra" {
 - Role assignment of the SCA Entra app (from commons) to the SCA Entra custom role at Entra/tenant scope
 - SCA service registration in CCE for the Entra tenant. Resource app and role come from Commons; this module only performs the Entra-level assignment and idsec registration.
 - When `shared_resources.add_permissions_to_manage_cluster` is true, assigns the K8s custom role (`resource_k8s_custom_role_id` from commons) at the root management group.
+
+#### Cloud Discovery (Optional - when `cds.enable = true` and `cds.shared_resources` set)
+- Role assignment of the Cloud Discovery resource app (from commons) to the Cloud Discovery resource custom role at the root management group
+- Cloud Discovery service registration in CCE for the Entra tenant, carrying both Cloud Discovery apps (Entra and resource). The apps, custom roles and the Cloud Discovery Entra app's root management group assignment are created by Commons, since every onboarding level uses them.
+- To offboard Cloud Discovery, set `cds.enable = false` and apply. Only after every level is offboarded, disable Cloud Discovery in Commons and apply to delete the shared resources. Do not remove the module block or run `terraform destroy`. This will offboard every service, not only Cloud Discovery.
 
 ## Documentation
 For more detailed examples, see the [Basic Example](./examples/basic) directory.

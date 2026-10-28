@@ -1,5 +1,5 @@
 variable "entra_id" {
-  description = "The Microsoft Entra ID."
+  description = "The Microsoft Entra tenant ID."
   type        = string
 }
 
@@ -49,6 +49,35 @@ variable "sca" {
       (try(var.sca.shared_resources.resource_k8s_custom_role_id, null) != null)
     )
     error_message = "add_permissions_to_manage_cluster and resource_k8s_custom_role_id must both either be set or not set. No mixed values."
+  }
+}
+
+variable "cds" {
+  description = "CDS configuration. When enable is true, shared_resources (from commons output) is required. The Microsoft Entra tenant only consumes it, assigns the resource app at the root management group and reports both CDS apps to CCE. The Entra app's root management group assignment is owned by commons."
+  type = object({
+    enable = optional(bool, false)
+    shared_resources = optional(object({
+      entra_app_id            = optional(string)
+      entra_custom_role_id    = optional(string)
+      entra_wif_user_id       = optional(string)
+      resource_app_id         = optional(string)
+      resource_custom_role_id = optional(string)
+      resource_wif_user_id    = optional(string)
+    }), null)
+  })
+  default = { enable = false, shared_resources = null }
+
+  validation {
+    condition = (
+      !var.cds.enable ||
+      (var.cds.shared_resources != null &&
+        try(length(var.cds.shared_resources.entra_app_id), 0) > 0 &&
+        try(length(var.cds.shared_resources.entra_wif_user_id), 0) > 0 &&
+        try(length(var.cds.shared_resources.resource_app_id), 0) > 0 &&
+        try(length(var.cds.shared_resources.resource_custom_role_id), 0) > 0 &&
+      try(length(var.cds.shared_resources.resource_wif_user_id), 0) > 0)
+    )
+    error_message = "When CDS is enabled (cds.enable = true), cds.shared_resources must be set with the entra_app_id, entra_wif_user_id, resource_app_id, resource_custom_role_id, and resource_wif_user_id (from commons output). Enable CDS in commons before enabling it here, and disable it here before disabling it in commons."
   }
 }
 

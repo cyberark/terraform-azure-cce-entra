@@ -13,7 +13,7 @@ data "idsec_cce_azure_identity_params" "get_wif_data" {}
 locals {
   cce_wif_data               = data.idsec_cce_azure_identity_params.get_wif_data.identity_params["cloud_onboarding"]
   sia_wif_data               = try(data.idsec_cce_azure_identity_params.get_wif_data.identity_params["dpa"], null)
-  at_least_1_service_enabled = var.sia.enable == true || var.sca.enable == true
+  at_least_1_service_enabled = var.sia.enable == true || var.sca.enable == true || var.cds.enable == true
 }
 module "cce" {
   source            = "./modules/cce"
@@ -41,6 +41,16 @@ module "sca" {
   shared_resources = var.sca.shared_resources
 }
 
+module "cds" {
+  source   = "./modules/cds"
+  count    = var.cds.enable && var.cds.shared_resources != null ? 1 : 0
+  entra_id = var.entra_id
+  shared_resources = {
+    resource_app_id         = var.cds.shared_resources.resource_app_id
+    resource_custom_role_id = var.cds.shared_resources.resource_custom_role_id
+  }
+}
+
 resource "idsec_cce_azure_entra" "create_entra" {
   entra_id    = var.entra_id
   cce_version = "0.0.1"
@@ -49,10 +59,11 @@ resource "idsec_cce_azure_entra" "create_entra" {
     appId = module.cce[0].cce_app_id
   }
 
-  # Ensure CCE, SIA (if used), and SCA (if used) are ready before idsec adds the Microsoft Entra tenant
-  depends_on = [module.cce, module.sia, module.sca]
+  # Ensure CCE, SIA (if used), SCA (if used), and CDS (if used) are ready before idsec adds the Microsoft Entra tenant
+  depends_on = [module.cce, module.sia, module.sca, module.cds]
 
-  services = concat(
+  # flatten, not concat: the services' resources have different types
+  services = flatten([
     # Add SIA if enabled and idsec provides dpa WIF data
     var.sia.enable ? [
       {
@@ -85,6 +96,28 @@ resource "idsec_cce_azure_entra" "create_entra" {
           } : {}
         )
       }
+    ] : [],
+    var.cds.enable && var.cds.shared_resources != null ? [
+      {
+        service_name = "cds"
+        version      = "2.1.0"
+        resources = {
+          application_ids = [
+            var.cds.shared_resources.entra_app_id,
+            var.cds.shared_resources.resource_app_id,
+          ]
+          applications = [
+            {
+              application_id            = var.cds.shared_resources.entra_app_id
+              identity_trusted_username = var.cds.shared_resources.entra_wif_user_id
+            },
+            {
+              application_id            = var.cds.shared_resources.resource_app_id
+              identity_trusted_username = var.cds.shared_resources.resource_wif_user_id
+            }
+          ]
+        }
+      }
     ] : []
-  )
+  ])
 }
