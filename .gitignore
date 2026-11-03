@@ -10,7 +10,11 @@
 .venv/
 # Isolated working dirs created by the apply/destroy test tier
 tests/fixtures/apply_*/
+# Temporary harness copies made by tests/tf_helpers.py (prepare_harness)
+tests/fixtures/harness_*/
+commons_source_override.tf
 __pycache__/
 *.pyc
 .pytest_cache/
 test-results.xml
+

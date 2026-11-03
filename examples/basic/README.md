@@ -75,7 +75,7 @@ This example demonstrates a basic configuration to onboard an Azure Entra tenant
 ### In Azure 
 
 **CCE Application:**
-* Microsoft Entra ID application: `CyberArk-CCE-app`  
+* Microsoft Entra ID application: `Idira-CCE-app`  
 * Service principal for the CCE application  
 * Microsoft Graph API Permissions with admin consent for CCE app:  
   * `CrossTenantInformation.ReadBasic.All` - Allows reading basic cross-tenant information  

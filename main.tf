@@ -13,7 +13,7 @@ data "idsec_cce_azure_identity_params" "get_wif_data" {}
 locals {
   cce_wif_data               = data.idsec_cce_azure_identity_params.get_wif_data.identity_params["cloud_onboarding"]
   sia_wif_data               = try(data.idsec_cce_azure_identity_params.get_wif_data.identity_params["dpa"], null)
-  at_least_1_service_enabled = var.sia.enable == true || var.sca.enable == true || var.cds.enable == true
+  at_least_1_service_enabled = var.sia.enable == true || var.sca.enable == true || var.secrets_hub.enable == true || var.cds.enable == true
 }
 module "cce" {
   source            = "./modules/cce"
@@ -41,6 +41,13 @@ module "sca" {
   shared_resources = var.sca.shared_resources
 }
 
+module "secrets_hub" {
+  source           = "./modules/secrets_hub"
+  count            = var.secrets_hub.enable ? 1 : 0
+  entra_id         = var.entra_id
+  shared_resources = var.secrets_hub.shared_resources
+}
+
 module "cds" {
   source   = "./modules/cds"
   count    = var.cds.enable && var.cds.shared_resources != null ? 1 : 0
@@ -59,8 +66,8 @@ resource "idsec_cce_azure_entra" "create_entra" {
     appId = module.cce[0].cce_app_id
   }
 
-  # Ensure CCE, SIA (if used), SCA (if used), and CDS (if used) are ready before idsec adds the Microsoft Entra tenant
-  depends_on = [module.cce, module.sia, module.sca, module.cds]
+  # Ensure CCE, SIA (if used), SCA (if used), Secrets Hub (if used), and CDS (if used) are ready before idsec adds the Microsoft Entra tenant
+  depends_on = [module.cce, module.sia, module.sca, module.secrets_hub, module.cds]
 
   # flatten, not concat: the services' resources have different types
   services = flatten([
@@ -95,6 +102,20 @@ resource "idsec_cce_azure_entra" "create_entra" {
             add_permissions_to_manage_cluster = true
           } : {}
         )
+      }
+    ] : [],
+    var.secrets_hub.enable ? [
+      {
+        service_name = "secrets_hub"
+        version      = "0.0.3"
+        resources = {
+          applications = [
+            {
+              application_id            = var.secrets_hub.shared_resources.app_id
+              identity_trusted_username = var.secrets_hub.shared_resources.identity_trusted_username
+            }
+          ]
+        }
       }
     ] : [],
     var.cds.enable && var.cds.shared_resources != null ? [

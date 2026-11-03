@@ -52,6 +52,31 @@ variable "sca" {
   }
 }
 
+
+variable "secrets_hub" {
+  description = "Secrets Hub configuration. When enable is true, shared_resources (the secrets_hub output of the Commons module) is required. This module does not create the Secrets Hub application or custom role; it assigns the Secrets Hub roles at the root management group and registers Secrets Hub in CCE."
+  type = object({
+    enable = optional(bool, false)
+    shared_resources = optional(object({
+      app_id                    = optional(string)
+      custom_role_id            = optional(string)
+      identity_trusted_username = optional(string)
+    }), null)
+  })
+  default = { enable = false, shared_resources = null }
+
+  validation {
+    condition = (
+      !var.secrets_hub.enable ||
+      (var.secrets_hub.shared_resources != null &&
+        try(var.secrets_hub.shared_resources.app_id, null) != null &&
+        try(var.secrets_hub.shared_resources.custom_role_id, null) != null &&
+      try(var.secrets_hub.shared_resources.identity_trusted_username, null) != null)
+    )
+    error_message = "When Secrets Hub is enabled (secrets_hub.enable = true), secrets_hub.shared_resources must be set and must include app_id, custom_role_id and identity_trusted_username (from the commons secrets_hub output)."
+  }
+}
+
 variable "cds" {
   description = "CDS configuration. When enable is true, shared_resources (from commons output) is required. The Microsoft Entra tenant only consumes it, assigns the resource app at the root management group and reports both CDS apps to CCE. The Entra app's root management group assignment is owned by commons."
   type = object({
@@ -80,4 +105,3 @@ variable "cds" {
     error_message = "When CDS is enabled (cds.enable = true), cds.shared_resources must be set with the entra_app_id, entra_wif_user_id, resource_app_id, resource_custom_role_id, and resource_wif_user_id (from commons output). Enable CDS in commons before enabling it here, and disable it here before disabling it in commons."
   }
 }
-
